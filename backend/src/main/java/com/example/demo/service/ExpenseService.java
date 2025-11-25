@@ -26,9 +26,12 @@ public class ExpenseService {
         this.expenseRepository = expenseRepository;
     }
 
-    // Simple list all (you already use this)
-    public List<Expense> getAll() {
-        return expenseRepository.findAll();
+    // ✅ Get with filters
+    public List<Expense> searchExpenses(LocalDate startDate,
+                                        LocalDate endDate,
+                                        Double minAmount,
+                                        Double maxAmount) {
+        return expenseRepository.search(startDate, endDate, minAmount, maxAmount);
     }
 
     /**
@@ -56,7 +59,7 @@ public class ExpenseService {
                     .build();
 
             String[] row;
-            int rowNumber = 1; // data rows start at 2 in the original file including header
+            int rowNumber = 1; // actual row number in file (including header)
 
             List<Expense> toSave = new ArrayList<>();
 
@@ -79,7 +82,7 @@ public class ExpenseService {
                 double amount;
 
                 try {
-                    date = LocalDate.parse(dateStr); // expects yyyy-MM-dd
+                    date = LocalDate.parse(dateStr); // yyyy-MM-dd
                 } catch (DateTimeParseException e) {
                     failed++;
                     errors.add("Row " + rowNumber + ": invalid date '" + dateStr + "'");

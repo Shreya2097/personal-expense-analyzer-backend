@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/expenses")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ExpenseController {
 
     private final ExpenseService expenseService;
@@ -24,13 +25,20 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-    // Simple: get all expenses
+    // ✅ Get expenses with optional filters
     @GetMapping
-    public List<Expense> getAllExpenses() {
-        return expenseService.getAll();
+    public List<Expense> getExpenses(
+            @RequestParam(value = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "minAmount", required = false) Double minAmount,
+            @RequestParam(value = "maxAmount", required = false) Double maxAmount
+    ) {
+        return expenseService.searchExpenses(startDate, endDate, minAmount, maxAmount);
     }
 
-    // Upload CSV
+    // ✅ Upload CSV
     @PostMapping(
             value = "/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -42,7 +50,7 @@ public class ExpenseController {
         return ResponseEntity.ok(response);
     }
 
-    // Summary by month (optional date range filters)
+    // ✅ Summary by month (date range filter)
     @GetMapping("/summary/monthly")
     public List<MonthlyExpenseSummaryDto> getMonthlySummary(
             @RequestParam(value = "startDate", required = false)
@@ -53,7 +61,7 @@ public class ExpenseController {
         return expenseService.getMonthlySummary(startDate, endDate);
     }
 
-    // Summary by category (optional date range filters)
+    // ✅ Summary by category (date range filter)
     @GetMapping("/summary/category")
     public List<CategoryExpenseSummaryDto> getCategorySummary(
             @RequestParam(value = "startDate", required = false)

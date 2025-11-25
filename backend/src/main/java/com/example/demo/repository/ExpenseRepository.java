@@ -12,6 +12,23 @@ import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
+    // ✅ Search with optional filters
+    @Query("""
+           select e from Expense e
+           where (:startDate is null or e.date >= :startDate)
+             and (:endDate is null or e.date <= :endDate)
+             and (:minAmount is null or e.amount >= :minAmount)
+             and (:maxAmount is null or e.amount <= :maxAmount)
+           order by e.date asc
+           """)
+    List<Expense> search(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("minAmount") Double minAmount,
+            @Param("maxAmount") Double maxAmount
+    );
+
+    // ✅ Monthly summary (optional date range)
     @Query("""
            select year(e.date) as year,
                   month(e.date) as month,
@@ -27,6 +44,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             @Param("endDate") LocalDate endDate
     );
 
+    // ✅ Category summary (optional date range)
     @Query("""
            select e.category as category,
                   sum(e.amount) as totalAmount
